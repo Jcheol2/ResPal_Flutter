@@ -1,0 +1,4 @@
+#Fri May 19 16:58:23 KST 2023
+base.0=/Users/parkjeongcheol/Documents/Flutter/ResPal_App/build/app/intermediates/dex/debug/mergeDexDebug/classes.dex
+renamed.0=classes.dex
+path.0=classes.dex
