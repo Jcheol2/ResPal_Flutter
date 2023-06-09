@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'main.dart';
 import 'package:flutter_web_auth/flutter_web_auth.dart';
 import 'package:dio/dio.dart';
-import 'package:logger/logger.dart';
+import 'main_page.dart';
+import 'signup_page.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -68,14 +69,22 @@ class _LoginPageState extends State<LoginPage> {
                   'Login',
                   style: new TextStyle(fontSize: 20.0),
                 ),
-                onPressed: validateAndSave,
+                onPressed:(){
+                  validateAndSave;
+                sendCommonToBackend(context, _email!, _password!);
+                }
               ),
-              new ElevatedButton(
-                child: new Text(
+              ElevatedButton(
+                child: Text(
                   'Sign Up',
-                  style: new TextStyle(fontSize: 20.0),
+                  style: TextStyle(fontSize: 20.0),
                 ),
-                onPressed: validateAndSave,
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => SignupPage()),
+                  );
+                },
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -83,25 +92,19 @@ class _LoginPageState extends State<LoginPage> {
                   IconButton(
                     icon: Image.asset('images/kakao.png', width: 100, height: 100),
                     onPressed: () {
-                      // 카카오 로그인 버튼 클릭 시 수행할 동작
-                      showToast("click kakao");
-                      signInKakao();
+                      signInOauth(context, "kakao");
                     },
                   ),
                   IconButton(
                     icon: Image.asset('images/google.png', width: 100, height: 100),
                     onPressed: () {
-                      // 구글 로그인 버튼 클릭 시 수행할 동작
-                      showToast("click google");
-                      signInGoogle();
+                      signInOauth(context, "google");
                     },
                   ),
                   IconButton(
                     icon: Image.asset('images/github.png', width: 100, height: 100),
                     onPressed: () {
-                      // 깃허브 로그인 버튼 클릭 시 수행할 동작
-                      showToast("click github");
-                      signInGithub();
+                      signInOauth(context, "github");
                     },
                   ),
                 ],
@@ -112,24 +115,37 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
   }
+}
 
-  void showToast(String message){
-    Fluttertoast.showToast(msg: message,
-      backgroundColor: Colors.white,
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM
-    );
+Future<void> signInOauth(BuildContext context, String platform) async {
+  // 로그인에 필요한 파라미터 설정
+  var clientId;
+  var redirectUri;
+  var loginUrl;
+  var scopes = ['', ''] ;
+  final urlScheme = "app";
+  var type = "";
+
+  if(platform.contains("kakao")){
+    clientId = '6dee52527ff692975e9b7b8596ad76b5';
+    redirectUri = 'http://api-respal.me/oauth/app/login/kakao';
+    loginUrl = 'https://kauth.kakao.com/oauth/authorize?'
+        'client_id=6dee52527ff692975e9b7b8596ad76b5&redirect_uri=http://api-respal.me/oauth/app/login/kakao&response_type=code';
+  }else if(platform.contains("google")){
+    clientId = '900804701090-sk6rt9ah5cp1tmg6ppudj48ki2hs29co.apps.googleusercontent.com';
+    redirectUri = 'http://api-respal.me/oauth/app/login/google';
+    loginUrl = 'https://accounts.google.com/o/oauth2/auth?'
+        'client_id=900804701090-sk6rt9ah5cp1tmg6ppudj48ki2hs29co.apps.googleusercontent.com&redirect_uri=http://api-respal.me/oauth/app/login/google&response_type=code&scope=https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile';
+    scopes = ['email', 'profile'];
+  }else if(platform.contains("github")){
+    clientId = 'Iv1.dbc970eb37f92943';
+    redirectUri = 'http://api-respal.me/oauth/app/login/github';
+    loginUrl = 'https://github.com/login/oauth/authorize?'
+        'client_id=Iv1.dbc970eb37f92943&redirect_uri=http://api-respal.me/oauth/app/login/github';
+  }else{
+    return;
   }
-}
 
-Future<void> signInKakao() async {
-  // 카카오 로그인에 필요한 파라미터 설정
-  final clientId = '6dee52527ff692975e9b7b8596ad76b5';
-  final redirectUri = 'http://api-respal.me/oauth/login/kakao';
-  final scopes = ['email', 'profile'];
-
-  // 카카오 로그인 URL
-  final loginUrl = 'https://kauth.kakao.com/oauth/authorize?client_id=6dee52527ff692975e9b7b8596ad76b5&redirect_uri=http://api-respal.me/oauth/login/kakao&response_type=code';
   // 로그인 요청 URL 생성
   final authUrl = Uri.parse(loginUrl).replace(queryParameters: {
     'client_id': clientId,
@@ -138,143 +154,164 @@ Future<void> signInKakao() async {
     'scope': scopes.join(' '),
   });
 
-  // 웹뷰를 통해 카카오 로그인 페이지 열기
+  // 웹뷰를 통해 로그인 페이지 열기
   final result = await FlutterWebAuth.authenticate(
     url: authUrl.toString(),
-    callbackUrlScheme: redirectUri,
+    callbackUrlScheme: urlScheme,
   );
 
-  // 콜백 데이터 처리
-  final uri = Uri.parse(result);
-  final code = uri.queryParameters['code'];
-
-  // 앱에서 받은 인증 코드를 백엔드로 전송하고 토큰을 받아올 수 있습니다.
-  // 백엔드와의 통신 방식에 따라 구현하셔야 합니다.
-  //sendAuthorizationCodeToBackend(code!);
-  // . . .
-  // 액세스 토큰 저장 및 관리 등 추가 작업을 수행합니다.
-  // . . .
-}
-
-Future<void> signInGoogle() async {
-  // 구글 로그인에 필요한 파라미터 설정
-  final clientId = '900804701090-sk6rt9ah5cp1tmg6ppudj48ki2hs29co.apps.googleusercontent.com';
-  final redirectUri = 'http://api-respal.me/oauth/app/login/google';
-  final scopes = ['email', 'profile'];
-
-  // 구글 로그인 URL
-  final loginUrl = 'https://accounts.google.com/o/oauth2/auth?client_id=900804701090-sk6rt9ah5cp1tmg6ppudj48ki2hs29co.apps.googleusercontent.com&redirect_uri=http://api-respal.me/oauth/app/login/google&response_type=code&scope=https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile';
-  // 로그인 요청 URL 생성
-  final authUrl = Uri.parse(loginUrl).replace(queryParameters: {
-    'client_id': clientId,
-    'redirect_uri': redirectUri,
-    'response_type': 'code',
-    'scope': scopes.join(' '),
-  });
-
-  // 웹뷰를 통해 구글 로그인 페이지 열기
-  final result = await FlutterWebAuth.authenticate(
-    url: authUrl.toString(),
-    callbackUrlScheme: 'app',
-  );
-  var logger = Logger();
   // 콜백 데이터 처리
   final uri = Uri.parse(result);
   final prefix = 'app://';
   final path = result.substring(prefix.length);
+  final code = uri.queryParameters['uid'];
 
-  String type = "";
   if (path.startsWith('signup')) {
-    logger.d("신규회원");
     type = "signup";
   }else if(path.startsWith('callback')){
-    logger.d("기존회원");
     type = "callback";
   }else {
-    logger.d("에러");
+    print("에러");
+    return;
   }
 
-  final code = uri.queryParameters['uid'];
-  logger.d(code);
-
-  sendAuthorizationCodeToBackend(type, code!);
-
-  // 앱에서 받은 인증 코드를 백엔드로 전송하고 토큰을 받아올 수 있습니다.
-  // 백엔드와의 통신 방식에 따라 구현하셔야 합니다.
-
-  // . . .
-  // 액세스 토큰 저장 및 관리 등 추가 작업을 수행합니다.
-  // . . .
+  sendOauthToBackend(context, type, code!);
 }
-
-Future<void> signInGithub() async {
-  // 깃허브 로그인에 필요한 파라미터 설정
-  final clientId = 'Iv1.dbc970eb37f92943';
-  final redirectUri = 'http://api-respal.me/oauth/login/github';
-  final scopes = ['email', 'profile'];
-
-  // 깃허브 로그인 URL
-  final loginUrl = 'https://github.com/login/oauth/authorize?client_id=Iv1.dbc970eb37f92943'
-      '&redirect_uri=http://api-respal.me/oauth/login/github';
-  // 로그인 요청 URL 생성
-  final authUrl = Uri.parse(loginUrl).replace(queryParameters: {
-    'client_id': clientId,
-    'redirect_uri': redirectUri,
-    'response_type': 'code',
-    'scope': scopes.join(' '),
-  });
-
-  // 웹뷰를 통해 깃허브 로그인 페이지 열기
-  final result = await FlutterWebAuth.authenticate(
-    url: authUrl.toString(),
-    callbackUrlScheme: redirectUri,
+Future<void> sendCommonToBackend(BuildContext context, String email, String password) async {
+  final dio = Dio(); // Dio 인스턴스 생성
+  final response = await dio.post(
+    'http://api-respal.me/member/login', // 백엔드 API 엔드포인트 URL
+    data: {
+      "email": email, // required
+      "password": password, // 일반회원은 필수, oauth는 null
+    },
   );
 
-  // 콜백 데이터 처리
-  final uri = Uri.parse(result);
-  final code = uri.queryParameters['code'];
+  // 응답 처리
+  if (response.statusCode == 200) {
+    // 토큰을 성공적으로 받아온 경우
+    final jsondata = response.data;
 
-  // 앱에서 받은 인증 코드를 백엔드로 전송하고 토큰을 받아올 수 있습니다.
-  // 백엔드와의 통신 방식에 따라 구현하셔야 합니다.
+    final accessToken = jsondata['data']['accessToken'];
+    final refreshToken = jsondata['data']['refreshToken'];
+    logger(accessToken);
+    logger(refreshToken);
+    Navigator.pop(context);
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => MainPage()),
+    );
 
-  // . . .
-  // 액세스 토큰 저장 및 관리 등 추가 작업을 수행합니다.
-  // . . .
-}
-
-Future<void> sendAuthorizationCodeToBackend(String type, String code) async {
-  final dio = Dio(); // Dio 인스턴스 생성
-  try {
-    dio.get('http://api-respal.me/oauth/user/uid=' + code + '?type='+type);
-    var logger = Logger();
-    logger.d(dio.toString());
-  }catch(e){
-    print('Exception occurred: $e');
+    // 받아온 토큰을 앱에서 저장하거나 관리하는 로직을 구현합니다.
+    // sharedpreference로 저장
+  } else {
+    // 오류가 발생한 경우
+    print('Error: ${response.statusCode}');
+    // 오류 처리 로직을 구현합니다.
+    // ...
   }
 
-    // final response = await dio.post(
-    //   'http://api-respal.me/oauth/user/'+code, // 백엔드 API 엔드포인트 URL
-    //   data: {
-    //     'code': code, // 인증 코드 전송
-    //   },
-    // );
+}
+
+// 앱에서 받은 인증 코드를 백엔드로 전송
+// 액세스 토큰 저장 및 관리 등 추가 작업을 수행합니다.
+Future<void> sendOauthToBackend(BuildContext context, String type, String code) async {
+  final dio = Dio(); // Dio 인스턴스 생성
+
+  logger(code);
+  logger(type);
+  try {
+    final response = await dio.get(
+      'http://api-respal.me/oauth/user/' + code + '?type=' + type, // 백엔드 API 엔드포인트 URL
+    );
+
+    logger(response);
+    logger(response.statusCode);
+    logger(response.data);
 
     // 응답 처리
-  //   if (response.statusCode == 200) {
-  //     // 토큰을 성공적으로 받아온 경우
-  //     final token = response.data;
-  //     // 받아온 토큰을 앱에서 저장하거나 관리하는 로직을 구현합니다.
-  //     // ...
-  //   } else {
-  //     // 오류가 발생한 경우
-  //     print('Error: ${response.statusCode}');
-  //     // 오류 처리 로직을 구현합니다.
-  //     // ...
-  //   }
-  // } catch (e) {
-  //   // 네트워크 요청 실패 등 예외가 발생한 경우
-  //   print('Exception occurred: $e');
-  //   // 예외 처리 로직을 구현합니다.
-  //   // ...
-  // }
+    if (response.statusCode == 200) {
+      // 토큰을 성공적으로 받아온 경우
+      final jsondata = response.data;
+      if(type.contains("signup")){
+        SignUpOauth(context, jsondata);
+      }else if(type.contains("callback")){
+        //토큰 내부에 저장 및 메인페이지로 전송
+        final accessToken = jsondata['data']['accessToken'];
+        final refreshToken = jsondata['data']['refreshToken'];
+        logger(accessToken);
+        logger(refreshToken);
+        Navigator.pop(context);
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => MainPage()),
+        );
+      }
+
+      // 받아온 토큰을 앱에서 저장하거나 관리하는 로직을 구현합니다.
+      // sharedpreference로 저장
+    } else {
+      // 오류가 발생한 경우
+      print('Error: ${response.statusCode}');
+      // 오류 처리 로직을 구현합니다.
+      // ...
+    }
+  } catch (e) {
+    // 네트워크 요청 실패 등 예외가 발생한 경우
+    print('Exception occurred: $e');
+    // 예외 처리 로직을 구현합니다.
+    // ...
+  }
+}
+
+Future<void> SignUpOauth(BuildContext context, dynamic jsondata) async {
+  final dio = Dio(); // Dio 인스턴스 생성
+  try {
+    final userInfo = jsondata['data']['userInfo'];
+    final email = userInfo['email'];
+    final image = userInfo['image'];
+    final nickname = userInfo['nickname'];
+    final provider = jsondata['data']['provider'];
+
+    final response = await dio.post(
+      'http://api-respal.me/member/join', // 백엔드 API 엔드포인트 URL
+      data: {
+        "email": email, // required
+        "password": null, // 일반회원은 필수, oauth는 null
+        "picture": image, // oauth login시 받은 image 자동 세팅
+        "nickname": nickname,
+        "provider": provider // required
+      },
+    );
+
+    logger(response);
+    logger(response.statusCode);
+    logger(response.data);
+
+    // 응답 처리
+    if (response.statusCode == 201) {
+      final accessToken = jsondata['data']['accessToken'];
+      final refreshToken = jsondata['data']['refreshToken'];
+      final membersEmail = jsondata['data']['membersEmail'];
+      logger(accessToken);
+      logger(refreshToken);
+      logger(membersEmail);
+
+      Navigator.pop(context);
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => MainPage()),
+      );
+    } else {
+      // 오류가 발생한 경우
+      print('Error: ${response.statusCode}');
+      // 오류 처리 로직을 구현합니다.
+      // ...
+    }
+  } catch (e) {
+    // 네트워크 요청 실패 등 예외가 발생한 경우
+    print('Exception occurred: $e');
+    // 예외 처리 로직을 구현합니다.
+    // ...
+  }
 }
