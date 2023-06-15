@@ -215,49 +215,74 @@ Future<void> sendCommonToBackend(BuildContext context, String email, String pass
 
 // 앱에서 받은 인증 코드를 백엔드로 전송
 // 액세스 토큰 저장 및 관리 등 추가 작업을 수행합니다.
+Future<void> sendAuthenticatedRequest(BuildContext context, String accessToken, String type) async {
+  final dio = Dio();
+
+  try {
+    final response = await dio.get(
+      'http://api-respal.me/test',
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+        },
+      ),
+    );
+
+    if (response.statusCode == 200) {
+      if(type.contains("login")){
+        showToast("로그인 되었습니다");
+      }else{
+        showToast("회원가입 되었습니다");
+      }
+      Navigator.pop(context);
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => MainPage()),
+      );
+    } else {
+      print('Error: ${response.statusCode}');
+    }
+  } catch (e) {
+    // 오류 처리
+    print('Exception occurred: $e');
+  }
+}
+
 Future<void> sendOauthToBackend(BuildContext context, String type, String code) async {
-  final dio = Dio(); // Dio 인스턴스 생성
+  final dio = Dio();
 
   logger(code);
   logger(type);
   try {
     final response = await dio.get(
-      'http://api-respal.me/oauth/user/' + code + '?type=' + type, // 백엔드 API 엔드포인트 URL
+      'http://api-respal.me/oauth/user/' + code + '?type=' + type,
     );
 
     logger(response);
     logger(response.statusCode);
     logger(response.data);
 
-    // 응답 처리
     if (response.statusCode == 200) {
-      // 토큰을 성공적으로 받아온 경우
       final jsondata = response.data;
-      if(type.contains("signup")){
+      if (type.contains("signup")) {
         SignUpOauth(context, jsondata);
-      }else if(type.contains("callback")){
-        //토큰 내부에 저장 및 메인페이지로 전송
+      } else if (type.contains("callback")) {
         final accessToken = jsondata['data']['accessToken'];
         final refreshToken = jsondata['data']['refreshToken'];
         logger(accessToken);
         logger(refreshToken);
-        Navigator.pop(context);
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => MainPage()),
-        );
+
+        // 새로운 요청을 보냄
+        await sendAuthenticatedRequest(context, accessToken, "login");
       }
 
-      // 받아온 토큰을 앱에서 저장하거나 관리하는 로직을 구현합니다.
-      // sharedpreference로 저장
+      // 토큰을 앱에서 저장하거나 관리하는 로직을 구현합니다.
     } else {
-      // 오류가 발생한 경우
       print('Error: ${response.statusCode}');
       // 오류 처리 로직을 구현합니다.
       // ...
     }
   } catch (e) {
-    // 네트워크 요청 실패 등 예외가 발생한 경우
     print('Exception occurred: $e');
     // 예외 처리 로직을 구현합니다.
     // ...
@@ -288,6 +313,7 @@ Future<void> SignUpOauth(BuildContext context, dynamic jsondata) async {
     logger(response.statusCode);
     logger(response.data);
 
+    jsondata = response.data;
     // 응답 처리
     if (response.statusCode == 201) {
       final accessToken = jsondata['data']['accessToken'];
@@ -297,11 +323,7 @@ Future<void> SignUpOauth(BuildContext context, dynamic jsondata) async {
       logger(refreshToken);
       logger(membersEmail);
 
-      Navigator.pop(context);
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => MainPage()),
-      );
+      await sendAuthenticatedRequest(context, accessToken, "signup");
     } else {
       // 오류가 발생한 경우
       print('Error: ${response.statusCode}');
