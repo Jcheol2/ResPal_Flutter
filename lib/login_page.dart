@@ -29,88 +29,143 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Log in'),
-        backgroundColor: Colors.redAccent,
-        centerTitle: true,
-        leading: IconButton(
-            icon: Icon(Icons.menu),
-            onPressed: (){}
-        ),
-        actions: <Widget>[
-          IconButton(
-              icon: Icon(Icons.search),
-              onPressed: (){}
-          )
-        ],
-      ),
-      body: new Container(
+      // 로그인 페이지의 경우 앱 바 구현 안함
+      // appBar: AppBar(
+      //   title: Text('Log in'),
+      //   backgroundColor: Colors.redAccent,
+      //   centerTitle: true,
+      //   leading: IconButton(
+      //       icon: Icon(Icons.menu),
+      //       onPressed: (){}
+      //   ),
+      //   actions: <Widget>[
+      //     IconButton(
+      //         icon: Icon(Icons.search),
+      //         onPressed: (){}
+      //     )
+      //   ],
+      // ),
+      body: Container(
         padding: EdgeInsets.all(16),
-        child: new Form(
-          key: formKey,
-          child: new Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              new TextFormField(
-                decoration: new InputDecoration(labelText: 'Email'),
-                validator: (value) =>
-                value?.isEmpty ?? true ? 'Email can\'t be empty' : null,
-                onSaved: (value) => _email = value ?? '',
-              ),
-              new TextFormField(
-                obscureText: true,
-                decoration: new InputDecoration(labelText: 'Password'),
-                validator: (value) =>
-                value?.isEmpty ?? true ? 'Password can\'t be empty' : null,
-                onSaved: (value) => _password = value ?? '',
-              ),
-              new ElevatedButton(
-                child: new Text(
-                  'Login',
-                  style: new TextStyle(fontSize: 20.0),
+        margin: EdgeInsets.only(top: 50),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Image.asset(
+              'images/title.png',
+              width: 120,
+              height: 45,
+            ),
+            SizedBox(height: 30),  // 텍스트 위젯과의 간격을 조절하기 위한 SizedBox
+            Text(
+              'Respal에 오신것을 환영합니다.',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 10),  // 텍스트 위젯과의 간격을 조절하기 위한 SizedBox
+            Text(
+              'Respal은 개발자를 위한 이력서 공유 플랫폼입니다.',
+              style: TextStyle(fontSize: 10, fontWeight: FontWeight.normal),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 40),  // 텍스트 위젯과의 간격을 조절하기 위한 SizedBox
+            Text(
+              'SNS 로그인',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.left,
+            ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                IconButton(
+                  iconSize: 110,
+                  icon: Image.asset('images/github.png'),
+                  onPressed: () {
+                    signInOauth(context, "github");
+                  },
                 ),
-                onPressed:(){
-                  validateAndSave;
-                sendCommonToBackend(context, _email!, _password!);
-                }
-              ),
-              ElevatedButton(
-                child: Text(
-                  'Sign Up',
-                  style: TextStyle(fontSize: 20.0),
+                IconButton(
+                  iconSize: 110,
+                  icon: Image.asset('images/google.png'),
+                  onPressed: () {
+                    signInOauth(context, "google");
+                  },
                 ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => SignupPage()),
-                  );
-                },
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  IconButton(
-                    icon: Image.asset('images/kakao.png', width: 100, height: 100),
+                IconButton(
+                  iconSize: 110,
+                  icon: Image.asset('images/kakao.png',),
+                  onPressed: () {
+                    signInOauth(context, "kakao");
+                  },
+                ),
+              ],
+            ),
+
+            //SizedBox(height: 20),
+            Image.asset(
+              'images/underline.png',
+              width: 100,
+              height: 20,
+            ),
+            SizedBox(height: 20),
+            Form(
+              key: formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  TextFormField(
+                    decoration: InputDecoration(labelText: '아이디'),
+                    validator: (value) =>
+                    value?.isEmpty ?? true ? 'Email can\'t be empty' : null,
+                    onSaved: (value) => _email = value ?? '',
+                  ),
+                  SizedBox(height: 20),
+                  TextFormField(
+                    obscureText: true,
+                    decoration: InputDecoration(labelText: '비밀번호'),
+                    validator: (value) =>
+                    value?.isEmpty ?? true ? 'Password can\'t be empty' : null,
+                    onSaved: (value) => _password = value ?? '',
+                  ),
+                  SizedBox(height: 40),
+                  ElevatedButton(
+                    child: Text(
+                      '로그인',
+                      style: TextStyle(fontSize: 20.0),
+                    ),
                     onPressed: () {
-                      signInOauth(context, "kakao");
+                      validateAndSave();
+                      sendCommonToBackend(context, _email!, _password!);
                     },
                   ),
-                  IconButton(
-                    icon: Image.asset('images/google.png', width: 100, height: 100),
+                  ElevatedButton(
+                    child: Text(
+                      '회원가입',
+                      style: TextStyle(fontSize: 20.0),
+                    ),
                     onPressed: () {
-                      signInOauth(context, "google");
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => SignupPage()),
+                      );
                     },
                   ),
-                  IconButton(
-                    icon: Image.asset('images/github.png', width: 100, height: 100),
+                  ElevatedButton(
+                    child: Text(
+                      '계정찾기',
+                      style: TextStyle(fontSize: 20.0),
+                    ),
                     onPressed: () {
-                      signInOauth(context, "github");
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => SignupPage()),
+                      );
                     },
                   ),
                 ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
