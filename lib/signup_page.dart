@@ -86,6 +86,18 @@ class _SignupPageState extends State<SignupPage> {
               ),
               new ElevatedButton(
                 child: new Text(
+                  'Image Select',
+                  style: new TextStyle(fontSize: 20.0),
+                ),
+                onPressed:(){
+                  validateAndSave;
+                  SignupToCommon(context, _email!, _password!, _nickname!, _image!);
+                },
+              ),
+
+
+              new ElevatedButton(
+                child: new Text(
                   'Sign Up',
                   style: new TextStyle(fontSize: 20.0),
                 ),

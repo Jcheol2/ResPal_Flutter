@@ -20,6 +20,7 @@ class _LoginPageState extends State<LoginPage> {
     final form = formKey.currentState;
     if (form?.validate() ?? false) {
       form?.save();
+      sendCommonToBackend(context, _email!, _password!);
       print('Form is valid Email: $_email, password: $_password');
     } else {
       print('Form is invalid Email: $_email, password: $_password');
@@ -84,12 +85,24 @@ class _LoginPageState extends State<LoginPage> {
                     signInOauth(context, "github");
                   },
                 ),
+<<<<<<< Updated upstream
                 IconButton(
                   iconSize: 110,
                   icon: Image.asset('images/google.png'),
                   onPressed: () {
                     signInOauth(context, "google");
                   },
+=======
+                onPressed:(){
+                  validateAndSave; // 이거 bool 형으로 만들어서 체크해서 백엔드로 보내게 수정
+                //sendCommonToBackend(context, _email!, _password!);
+                }
+              ),
+              ElevatedButton(
+                child: Text(
+                  'Sign Up',
+                  style: TextStyle(fontSize: 20.0),
+>>>>>>> Stashed changes
                 ),
                 IconButton(
                   iconSize: 110,
@@ -254,7 +267,9 @@ Future<void> sendCommonToBackend(BuildContext context, String email, String pass
     Navigator.pop(context);
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => MainPage()),
+        MaterialPageRoute(
+            builder: (context) => MainPage(refreshToken)
+        )
     );
 
     // 받아온 토큰을 앱에서 저장하거나 관리하는 로직을 구현합니다.
@@ -270,7 +285,7 @@ Future<void> sendCommonToBackend(BuildContext context, String email, String pass
 
 // 앱에서 받은 인증 코드를 백엔드로 전송
 // 액세스 토큰 저장 및 관리 등 추가 작업을 수행합니다.
-Future<void> sendAuthenticatedRequest(BuildContext context, String accessToken, String type) async {
+Future<void> sendAuthenticatedRequest(BuildContext context, String refreshToken, String accessToken, String type) async {
   final dio = Dio();
 
   try {
@@ -289,10 +304,11 @@ Future<void> sendAuthenticatedRequest(BuildContext context, String accessToken, 
       }else{
         showToast("회원가입 되었습니다");
       }
+
       Navigator.pop(context);
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => MainPage()),
+        MaterialPageRoute(builder: (context) => MainPage(refreshToken)),
       );
     } else {
       print('Error: ${response.statusCode}');
@@ -328,7 +344,7 @@ Future<void> sendOauthToBackend(BuildContext context, String type, String code) 
         logger(refreshToken);
 
         // 새로운 요청을 보냄
-        await sendAuthenticatedRequest(context, accessToken, "login");
+        await sendAuthenticatedRequest(context, refreshToken, accessToken, "login");
       }
 
       // 토큰을 앱에서 저장하거나 관리하는 로직을 구현합니다.
@@ -378,7 +394,7 @@ Future<void> SignUpOauth(BuildContext context, dynamic jsondata) async {
       logger(refreshToken);
       logger(membersEmail);
 
-      await sendAuthenticatedRequest(context, accessToken, "signup");
+      await sendAuthenticatedRequest(context, refreshToken, accessToken, "signup");
     } else {
       // 오류가 발생한 경우
       print('Error: ${response.statusCode}');
