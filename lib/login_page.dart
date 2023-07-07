@@ -30,130 +30,225 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
+      body: SingleChildScrollView(
+        child: Container(
         padding: EdgeInsets.all(16),
         margin: EdgeInsets.only(top: 50),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
+            SizedBox(height: 20),
             Image.asset(
               'images/title.png',
               width: 120,
               height: 45,
             ),
+
             SizedBox(height: 30),
+
             Text(
               'Respal에 오신것을 환영합니다.',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
+
             SizedBox(height: 10),
+
             Text(
               'Respal은 개발자를 위한 이력서 공유 플랫폼입니다.',
               style: TextStyle(fontSize: 10, fontWeight: FontWeight.normal),
               textAlign: TextAlign.center,
             ),
+
             SizedBox(height: 40),
+
             Text(
               'SNS 로그인',
               style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
               textAlign: TextAlign.left,
             ),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                IconButton(
-                  iconSize: 100,
-                  icon: Image.asset('images/github.png'),
-                  onPressed: () {
-                    signInOauth(context, "github");
-                  },
+                Expanded(
+                  child: IconButton(
+                    icon: Image.asset('images/github.png'),
+                    onPressed: () {
+                      signInOauth(context, "github");
+                    },
+                  ),
                 ),
-                IconButton(
-                  iconSize: 100,
-                  icon: Image.asset('images/google.png'),
-                  onPressed: () {
-                    signInOauth(context, "google");
-                  },
+                Expanded(
+                  child: IconButton(
+                    icon: Image.asset('images/google.png'),
+                    onPressed: () {
+                      signInOauth(context, "google");
+                    },
+                  ),
                 ),
-                IconButton(
-                  iconSize: 100,
-                  icon: Image.asset('images/kakao.png'),
-                  onPressed: () {
-                    signInOauth(context, "kakao");
-                  },
+                Expanded(
+                  child: IconButton(
+                    icon: Image.asset('images/kakao.png'),
+                    onPressed: () {
+                      signInOauth(context, "kakao");
+                    },
+                  ),
                 ),
               ],
             ),
 
-            //SizedBox(height: 20),
+            SizedBox(height: 20),
+
             Image.asset(
               'images/underline.png',
               width: 100,
               height: 20,
             ),
-            //SizedBox(height: 20),
+            SizedBox(height: 20),
             Form(
               key: formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
-                  TextFormField(
-                    decoration: InputDecoration(labelText: '아이디'),
-                    validator: (value) =>
-                    value?.isEmpty ?? true ? 'Email can\'t be empty' : null,
-                    onSaved: (value) => _email = value ?? '',
+                  Text(
+                    '아이디',
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.left,
                   ),
+
+                  SizedBox(height: 10),
+
+                  Container(
+                    constraints: BoxConstraints(
+                      maxHeight: 30.0,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.grey,
+                        width: 0.8,
+                      ),
+                      borderRadius: BorderRadius.circular(6.5),
+                    ),
+                    child:TextFormField(
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                      ),
+                      validator: (value) => value?.isEmpty ?? true ? 'Email can\'t be empty' : null,
+                      onSaved: (value) => _email = value ?? '',
+                    ),
+                  ),
+
+                  SizedBox(height: 30),
+
+                  Text(
+                    '비밀번호',
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.left,
+                  ),
+
+                  SizedBox(height: 10),
+
+                  Container(
+                    constraints: BoxConstraints(
+                      maxHeight: 30.0,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.grey,
+                        width: 0.8,
+                      ),
+                      borderRadius: BorderRadius.circular(6.5),
+                    ),
+                    child: TextFormField(
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                      ),
+                      validator: (value) => value?.isEmpty ?? true ? 'Password can\'t be empty' : null,
+                      onSaved: (value) => _email = value ?? '',
+                    ),
+                  ),
+
                   SizedBox(height: 20),
-                  TextFormField(
-                    obscureText: true,
-                    decoration: InputDecoration(labelText: '비밀번호'),
-                    validator: (value) =>
-                    value?.isEmpty ?? true ? 'Password can\'t be empty' : null,
-                    onSaved: (value) => _password = value ?? '',
+
+                  Align(
+                    alignment: Alignment.centerRight, // 오른쪽 정렬을 설정합니다.
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => SignupPage()),
+                        );
+                      },
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all<Color>(Colors.transparent),
+                      ),
+                      child: Text(
+                        "계정찾기",
+                        style: TextStyle(
+                          color: Colors.deepPurpleAccent,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
                   ),
-                  SizedBox(height: 40),
                   ElevatedButton(
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFF3B3B3B)), // 배경색 지정
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                      ),
+                    ),
                     child: Text(
                       '로그인',
-                      style: TextStyle(fontSize: 20.0),
+                      style: TextStyle(fontSize: 12),
                     ),
                     onPressed: () {
                       validateAndSave();
                       sendCommonToBackend(context, _email!, _password!);
                     },
                   ),
-                  ElevatedButton(
-                    child: Text(
-                      '회원가입',
-                      style: TextStyle(fontSize: 20.0),
+
+                  Center(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center, // 가로 방향 정렬을 중앙으로 설정합니다.
+                      children: [
+                        Text(
+                          '아직 회원이 아니신가요?',
+                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
+                          textAlign: TextAlign.left,
+                        ),
+                        SizedBox(width: 1), // 필요한 간격을 설정합니다.
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => SignupPage()),
+                            );
+                          },
+                          style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all<Color>(Colors.transparent),
+                          ),
+                          child: Text(
+                            "회원가입",
+                            style: TextStyle(
+                              color: Colors.deepPurpleAccent,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => SignupPage()),
-                      );
-                    },
-                  ),
-                  ElevatedButton(
-                    child: Text(
-                      '계정찾기',
-                      style: TextStyle(fontSize: 20.0),
-                    ),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => SignupPage()),
-                      );
-                    },
-                  ),
+                  )
                 ],
               ),
             ),
           ],
         ),
       ),
+    ),
     );
   }
 
