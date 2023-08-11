@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'main_page.dart';
-import 'login_page.dart';
+import 'view/Main_page.dart';
+import 'view/Login_page.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logger/logger.dart';
 
@@ -16,6 +16,7 @@ class MyApp extends StatelessWidget {
     return new MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'ResPal',
+      // home: new MainPage("refreshToken"),
       home: new LoginPage(),
     );
   }
